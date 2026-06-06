@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a3d2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Agenda SRB">
+<title>Agenda SRB</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--verde:#0a3d2e;--verde-medio:#1a5c44;--verde-claro:#2d7a5e;--acento:#c8a84b;--acento-claro:#e8c97a;--fondo:#f5f2eb;--fondo-card:#ffffff;--texto:#1a1a1a;--texto-suave:#6b6b6b;--borde:#e0dbd0;--rojo:#c0392b;--azul:#1a4a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--fondo);color:var(--texto);min-height:100vh;overflow-x:hidden}
+header{background:var(--verde);color:white;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(10,61,46,0.3)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
+.header-logo-wrap{display:flex;align-items:center;gap:10px}
+.header-icon-srb{width:42px;height:42px;background:var(--acento);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.header-text h1{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+.header-text p{font-size:11px;opacity:.72;font-weight:400;margin-top:2px}
+.btn-nueva-tarea{background:var(--acento);color:var(--verde);border:none;padding:9px 16px;border-radius:20px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.filtros-wrap{background:var(--verde);padding:0 16px 14px;overflow-x:auto;scrollbar-width:none}
+.filtros{display:flex;gap:8px;min-width:max-content}
+.filtro-btn{padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.7);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.filtro-btn.active{background:var(--acento);border-color:var(--acento);color:var(--verde);font-weight:600}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 16px 0}
+.stat-card{background:var(--fondo-card);border-radius:14px;padding:12px 10px;text-align:center;border:1px solid var(--borde);box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.stat-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--verde);line-height:1}
+.stat-label{font-size:10px;color:var(--texto-suave);margin-top:3px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.semana-wrap{padding:16px 16px 0}
+.semana-titulo{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--texto-suave);font-weight:600;margin-bottom:10px}
+.semana-dias{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dia-btn{display:flex;flex-direction:column;align-items:center;padding:8px 4px;border-radius:12px;border:1px solid var(--borde);background:var(--fondo-card);cursor:pointer;transition:all .2s;position:relative}
+.dia-btn.hoy{background:var(--verde);border-color:var(--verde);color:white}
+.dia-btn.seleccionado{background:var(--acento);border-color:var(--acento);color:var(--verde)}
+.dia-btn.tiene-tareas::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--acento);display:block;margin-top:3px}
+.dia-btn.hoy.tiene-tareas::after,.dia-btn.seleccionado.tiene-tareas::after{background:white}
+.dia-nombre{font-size:10px;font-weight:500;opacity:.7;text-transform:uppercase}
+.dia-num{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-top:2px}
+.telegram-banner{background:linear-gradient(135deg,#1a5c44,#0a3d2e);color:white;padding:14px 16px;margin:16px;border-radius:14px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 15px rgba(10,61,46,0.3)}
+.tg-icon{width:40px;height:40px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.tg-text h3{font-size:13px;font-weight:600;margin-bottom:2px}
+.tg-text p{font-size:11px;opacity:.75;line-height:1.3}
+.tareas-section{padding:16px}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.section-titulo{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--verde)}
+.section-count{background:var(--verde);color:white;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.tarea-card{background:var(--fondo-card);border-radius:16px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--borde);box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;align-items:flex-start;gap:12px;transition:all .25s;position:relative;overflow:hidden}
+.tarea-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+.tarea-card.tipo-visita::before{background:var(--verde-claro)}
+.tarea-card.tipo-medicamento::before{background:#e74c3c}
+.tarea-card.tipo-turno::before{background:var(--azul)}
+.tarea-card.tipo-administrativo::before{background:var(--acento)}
+.tarea-card.tipo-fecha::before{background:#8e44ad}
+.tarea-card.completada{opacity:.55}
+.tarea-card.completada .tarea-titulo{text-decoration:line-through}
+.tarea-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--borde);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px;transition:all .2s;background:white}
+.tarea-check.checked{background:var(--verde);border-color:var(--verde);color:white}
+.tarea-body{flex:1;min-width:0}
+.tarea-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.tarea-titulo{font-size:14px;font-weight:600;color:var(--texto);line-height:1.3;flex:1}
+.tarea-tipo-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:10px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.badge-visita{background:#e8f5f0;color:var(--verde-claro)}
+.badge-medicamento{background:#fdecea;color:#c0392b}
+.badge-turno{background:#e8f0f8;color:var(--azul)}
+.badge-administrativo{background:#fdf6e3;color:#b8860b}
+.badge-fecha{background:#f5e8ff;color:#8e44ad}
+.tarea-meta{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
+.tarea-meta span{font-size:12px;color:var(--texto-suave);display:flex;align-items:center;gap:4px}
+.tarea-notas{font-size:12px;color:var(--texto-suave);margin-top:5px;line-height:1.4;font-style:italic}
+.tarea-acciones{display:flex;gap:6px;flex-shrink:0}
+.btn-icono{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;background:var(--fondo)}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,61,46,0.5);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--fondo-card);border-radius:24px 24px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:20px 20px 36px;animation:slideUp .35s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--borde);border-radius:4px;margin:0 auto 20px}
+.modal-titulo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--verde);margin-bottom:20px}
+.form-grupo{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--texto-suave);margin-bottom:7px}
+.form-input,.form-select,.form-textarea{width:100%;padding:12px 14px;border:1.5px solid var(--borde);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--texto);background:var(--fondo);transition:border-color .2s;appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--verde);background:white}
+.form-textarea{resize:vertical;min-height:70px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-guardar{width:100%;padding:15px;background:var(--verde);color:white;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;transition:all .2s}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:var(--fondo-card);border-top:1px solid var(--borde);display:grid;grid-template-columns:repeat(3,1fr);padding:8px 0 20px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.06)}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px;border-radius:12px}
+.tab-item.active .tab-icono,.tab-item.active .tab-label{color:var(--verde);font-weight:600}
+.tab-icono{font-size:20px;color:var(--texto-suave)}
+.tab-label{font-size:10px;color:var(--texto-suave);font-weight:500}
+.content-area{padding-bottom:90px}
+.vista{display:none}
+.vista.activa{display:block}
+.vacio{text-align:center;padding:40px 20px;color:var(--texto-suave)}
+.vacio-icono{font-size:40px;margin-bottom:12px}
+.vacio h3{font-family:'Playfair Display',serif;font-size:16px;color:var(--verde);margin-bottom:6px}
+.loading{text-align:center;padding:30px;color:var(--texto-suave);font-size:14px}
+</style>
+</head>
+<body>
+<header>
+<div class="header-inner">
+<div class="header-logo-wrap">
+<div class="header-icon-srb">🐄</div>
+<div class="header-text">
+<h1>Agenda SRB</h1>
+<p>M.V. Blanco Sereno Matías A.</p>
+</div>
+</div>
+<button class="btn-nueva-tarea" onclick="abrirModal()">+ Nueva</button>
+</div>
+<div class="filtros-wrap">
+<div class="filtros">
+<button class="filtro-btn active" onclick="filtrar('todos',this)">Todos</button>
+<button class="filtro-btn" onclick="filtrar('visita',this)">🏡 Visitas</button>
+<button class="filtro-btn" onclick="filtrar('medicamento',this)">💉 Medicamentos</button>
+<button class="filtro-btn" onclick="filtrar('turno',this)">📅 Turnos</button>
+<button class="filtro-btn" onclick="filtrar('administrativo',this)">📋 Admin</button>
+<button class="filtro-btn" onclick="filtrar('fecha',this)">🔖 Fechas</button>
+</div>
+</div>
+</header>
+<div class="content-area">
+<div class="vista activa" id="vista-agenda">
+<div class="stats-bar" id="stats-bar"><div class="loading">Cargando...</div></div>
+<div class="semana-wrap">
+<div class="semana-titulo">Esta semana</div>
+<div class="semana-dias" id="semana-dias"></div>
+</div>
+<div class="telegram-banner">
+<div class="tg-icon">✈️</div>
+<div class="tg-text"><h3>Bot de Telegram activo</h3><p>Escribí o mandá audio a tu bot para agregar tareas</p></div>
+</div>
+<div class="tareas-section">
+<div class="section-header">
+<span class="section-titulo" id="titulo-lista">Tareas de hoy</span>
+<span class="section-count" id="count-tareas">0</span>
+</div>
+<div id="lista-tareas"><div class="loading">Cargando tareas...</div></div>
+</div>
+</div>
+<div class="vista" id="vista-calendario">
+<div style="padding:16px 16px 0;display:flex;justify-content:space-between;align-items:center">
+<div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--verde)" id="mes-titulo"></div>
+<div style="display:flex;gap:8px">
+<button onclick="cambiarMes(-1)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--borde);background:white;cursor:pointer;font-size:14px">‹</button>
+<button onclick="cambiarMes(1)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--borde);background:white;cursor:pointer;font-size:14px">›</button>
+</div>
+</div>
+<div class="cal-grid" id="cal-grid" style="padding:0 16px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-top:12px"></div>
+<div class="tareas-section" style="margin-top:12px">
+<div class="section-header">
+<span class="section-titulo" id="titulo-cal">Seleccioná un día</span>
+<span class="section-count" id="count-cal">0</span>
+</div>
+<div id="lista-cal"></div>
+</div>
+</div>
+<div class="vista" id="vista-config">
+<div style="padding:16px">
+<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--texto-suave);font-weight:600;margin-bottom:12px">Cuenta</div>
+<div style="background:white;border-radius:14px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--borde);display:flex;align-items:center;gap:12px">
+<div style="width:38px;height:38px;border-radius:10px;background:var(--fondo);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>
+<div><div style="font-size:14px;font-weight:600">M.V. Blanco Sereno Matías A.</div><div style="font-size:12px;color:var(--texto-suave)">Médico Veterinario · Realicó, La Pampa</div></div>
+</div>
+<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--texto-suave);font-weight:600;margin:16px 0 12px">Recordatorios</div>
+<div style="background:white;border-radius:14px;padding:14px 16px;border:1px solid var(--borde);display:flex;align-items:center;gap:12px">
+<div style="width:38px;height:38px;border-radius:10px;background:var(--fondo);display:flex;align-items:center;justify-content:center;font-size:18px">🔔</div>
+<div><div style="font-size:14px;font-weight:600">1 y 2 días antes</div><div style="font-size:12px;color:var(--texto-suave)">Via Telegram automático</div></div>
+<div style="margin-left:auto;background:var(--acento);color:var(--verde);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">ON</div>
+</div>
+<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--texto-suave);font-weight:600;margin:16px 0 12px">Datos</div>
+<div style="background:white;border-radius:14px;padding:14px 16px;border:1px solid var(--borde);display:flex;align-items:center;gap:12px;cursor:pointer" onclick="if(confirm('¿Eliminar todas las tareas?'))limpiarTodo()">
+<div style="width:38px;height:38px;border-radius:10px;background:var(--fondo);display:flex;align-items:center;justify-content:center;font-size:18px">🗑️</div>
+<div><div style="font-size:14px;font-weight:600">Limpiar tareas</div><div style="font-size:12px;color:var(--texto-suave)">Eliminar todas las tareas</div></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tab-bar">
+<div class="tab-item active" onclick="cambiarVista('agenda',this)"><span class="tab-icono">📋</span><span class="tab-label">Agenda</span></div>
+<div class="tab-item" onclick="cambiarVista('calendario',this)"><span class="tab-icono">📅</span><span class="tab-label">Calendario</span></div>
+<div class="tab-item" onclick="cambiarVista('config',this)"><span class="tab-icono">⚙️</span><span class="tab-label">Ajustes</span></div>
+</div>
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarSiOverlay(event)">
+<div class="modal">
+<div class="modal-handle"></div>
+<div class="modal-titulo" id="modal-titulo">Nueva Tarea</div>
+<div class="form-grupo"><label class="form-label">Título *</label><input type="text" class="form-input" id="input-titulo" placeholder="Ej: Visita establecimiento La Esperanza"></div>
+<div class="form-grupo"><label class="form-label">Tipo</label><select class="form-select" id="input-tipo"><option value="visita">🏡 Visita a establecimiento</option><option value="medicamento">💉 Medicamento / Vacuna</option><option value="turno">📅 Turno / Reunión</option><option value="administrativo">📋 Tarea administrativa</option><option value="fecha">🔖 Fecha de trabajo</option></select></div>
+<div class="form-row"><div class="form-grupo"><label class="form-label">Fecha *</label><input type="date" class="form-input" id="input-fecha"></div><div class="form-grupo"><label class="form-label">Hora</label><input type="time" class="form-input" id="input-hora"></div></div>
+<div class="form-grupo"><label class="form-label">Establecimiento / Cliente</label><input type="text" class="form-input" id="input-lugar" placeholder="Ej: Estancia La Pampeana"></div>
+<div class="form-grupo"><label class="form-label">Notas</label><textarea class="form-textarea" id="input-notas" placeholder="Detalles adicionales..."></textarea></div>
+<div class="form-grupo"><label class="form-label">Prioridad</label><select class="form-select" id="input-prioridad"><option value="normal">Normal</option><option value="alta">Alta</option><option value="media">Media</option></select></div>
+<button class="btn-guardar" onclick="guardarTarea()">✓ Guardar Tarea</button>
+</div>
+</div>
+<script>
+const SUPABASE_URL='https://vleouvzzooxvesrlmznp.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsZW91dnp6b294dmVzcmxtem5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NTg5NzQsImV4cCI6MjA5NjMzNDk3NH0.dtM-jZIKl_gOxTglo_zhOVBw1k15O02hIVjJ6z0U-y4';
+let tareas=[];let filtroActivo='todos';let diaSeleccionado=new Date();let mesCalendario=new Date();let tareaEditando=null;
+async function sbGet(p){const r=await fetch(SUPABASE_URL+'/rest/v1/'+p,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});return r.json()}
+async function sbPost(b){const r=await fetch(SUPABASE_URL+'/rest/v1/tareas',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(b)});return r.json()}
+async function sbPatch(id,b){await fetch(SUPABASE_URL+'/rest/v1/tareas?id=eq.'+id,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify(b)})}
+async function sbDelete(id){await fetch(SUPABASE_URL+'/rest/v1/tareas?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}})}
+function hoyStr(){return new Date().toISOString().split('T')[0]}
+function diaStr(d){return d.toISOString().split('T')[0]}
+function formatFecha(s){if(!s)return'';const[y,m,d]=s.split('-');return d+'/'+m+'/'+y}
+const TIPOS={visita:{label:'Visita',badgeClass:'badge-visita'},medicamento:{label:'Medicamento',badgeClass:'badge-medicamento'},turno:{label:'Turno',badgeClass:'badge-turno'},administrativo:{label:'Admin',badgeClass:'badge-administrativo'},fecha:{label:'Fecha',badgeClass:'badge-fecha'}};
+function renderStats(){const h=hoyStr();const p=tareas.filter(t=>!t.completada&&t.fecha>=h).length;const hc=tareas.filter(t=>t.fecha===h).length;const hoy=new Date();hoy.setHours(0,0,0,0);const fin=new Date(hoy);fin.setDate(fin.getDate()+7);const s=tareas.filter(t=>{const f=new Date(t.fecha+'T12:00:00');return f>=hoy&&f<=fin}).length;const c=tareas.filter(t=>t.completada).length;document.getElementById('stats-bar').innerHTML='<div class="stat-card"><div class="stat-num">'+p+'</div><div class="stat-label">Pendientes</div></div><div class="stat-card"><div class="stat-num">'+hc+'</div><div class="stat-label">Hoy</div></div><div class="stat-card"><div class="stat-num">'+s+'</div><div class="stat-label">Semana</div></div><div class="stat-card"><div class="stat-num">'+c+'</div><div class="stat-label">Listas</div></div>'}
+function renderSemana(){const hoy=new Date();const lunes=new Date(hoy);lunes.setDate(hoy.getDate()-((hoy.getDay()+6)%7));const dias=['Lu','Ma','Mi','Ju','Vi','Sá','Do'];let html='';for(let i=0;i<7;i++){const d=new Date(lunes);d.setDate(lunes.getDate()+i);const str=diaStr(d);const esHoy=str===hoyStr();const esSel=str===diaStr(diaSeleccionado);const tiene=tareas.some(t=>t.fecha===str);html+='<button class="dia-btn '+(esHoy?'hoy':'')+(esSel&&!esHoy?' seleccionado':'')+(tiene?' tiene-tareas':'')+'" onclick="seleccionarDia(\''+str+'\')"><span class="dia-nombre">'+dias[i]+'</span><span class="dia-num">'+d.getDate()+'</span></button>'}document.getElementById('semana-dias').innerHTML=html}
+function seleccionarDia(s){diaSeleccionado=new Date(s+'T12:00:00');renderSemana();renderLista()}
+function renderTareaCard(t){const tipo=TIPOS[t.tipo]||TIPOS.administrativo;return'<div class="tarea-card tipo-'+(t.tipo||'administrativo')+(t.completada?' completada':'')+'"><div class="tarea-check '+(t.completada?'checked':'')+'" onclick="toggleCompletar(\''+t.id+'\')">'+(t.completada?'✓':'')+'</div><div class="tarea-body"><div class="tarea-top"><div class="tarea-titulo">'+t.titulo+'</div><span class="tarea-tipo-badge '+tipo.badgeClass+'">'+tipo.label+'</span></div><div class="tarea-meta">'+(t.hora?'<span>🕐 '+t.hora+'</span>':'')+(t.lugar?'<span>📍 '+t.lugar+'</span>':'')+'</div>'+(t.notas&&t.notas!==t.titulo?'<div class="tarea-notas">'+t.notas+'</div>':'')+'</div><div class="tarea-acciones"><button class="btn-icono" onclick="editarTarea(\''+t.id+'\')">✏️</button><button class="btn-icono" onclick="eliminarTarea(\''+t.id+'\')">🗑️</button></div></div>'}
+function renderLista(){const str=diaStr(diaSeleccionado);const h=hoyStr();let lista=tareas.filter(t=>{if(filtroActivo!=='todos'&&t.tipo!==filtroActivo)return false;return t.fecha===str});lista.sort((a,b)=>a.completada!==b.completada?a.completada?1:-1:(a.hora||'99')>(b.hora||'99')?1:-1);document.getElementById('titulo-lista').textContent=str===h?'Tareas de hoy':'Tareas del '+formatFecha(str);document.getElementById('count-tareas').textContent=lista.length;document.getElementById('lista-tareas').innerHTML=lista.length?lista.map(t=>renderTareaCard(t)).join(''):'<div class="vacio"><div class="vacio-icono">📭</div><h3>Sin tareas</h3><p>No hay tareas para este día</p></div>'}
+function filtrar(tipo,btn){filtroActivo=tipo;document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLista();if(document.getElementById('vista-calendario').classList.contains('activa'))renderListaCal()}
+async function toggleCompletar(id){const t=tareas.find(x=>x.id===id);if(t){t.completada=!t.completada;await sbPatch(id,{completada:t.completada});renderStats();renderLista();renderSemana()}}
+async function eliminarTarea(id){if(!confirm('¿Eliminar esta tarea?'))return;await sbDelete(id);tareas=tareas.filter(x=>x.id!==id);renderStats();renderLista();renderSemana()}
+function abrirModal(id=null){tareaEditando=id;document.getElementById('modal-overlay').classList.add('visible');if(id){const t=tareas.find(x=>x.id===id);document.getElementById('modal-titulo').textContent='Editar Tarea';document.getElementById('input-titulo').value=t.titulo;document.getElementById('input-tipo').value=t.tipo;document.getElementById('input-fecha').value=t.fecha||'';document.getElementById('input-hora').value=t.hora||'';document.getElementById('input-lugar').value=t.lugar||'';document.getElementById('input-notas').value=t.notas||'';document.getElementById('input-prioridad').value=t.prioridad||'normal'}else{document.getElementById('modal-titulo').textContent='Nueva Tarea';document.getElementById('input-titulo').value='';document.getElementById('input-tipo').value='visita';document.getElementById('input-fecha').value=diaStr(diaSeleccionado);document.getElementById('input-hora').value='';document.getElementById('input-lugar').value='';document.getElementById('input-notas').value='';document.getElementById('input-prioridad').value='normal'}}
+function cerrarModal(){document.getElementById('modal-overlay').classList.remove('visible')}
+function cerrarSiOverlay(e){if(e.target===document.getElementById('modal-overlay'))cerrarModal()}
+async function guardarTarea(){const titulo=document.getElementById('input-titulo').value.trim();const fecha=document.getElementById('input-fecha').value;if(!titulo||!fecha){alert('Completá el título y la fecha.');return}const tarea={id:tareaEditando||Date.now().toString(),titulo,tipo:document.getElementById('input-tipo').value,fecha,hora:document.getElementById('input-hora').value||null,lugar:document.getElementById('input-lugar').value.trim()||null,notas:document.getElementById('input-notas').value.trim()||null,prioridad:document.getElementById('input-prioridad').value,completada:tareaEditando?tareas.find(x=>x.id===tareaEditando)?.completada:false,rec1d:false,rec2d:false};if(tareaEditando){await sbPatch(tareaEditando,tarea);tareas=tareas.map(x=>x.id===tareaEditando?tarea:x)}else{await sbPost(tarea);tareas.push(tarea)}cerrarModal();diaSeleccionado=new Date(fecha+'T12:00:00');renderStats();renderSemana();renderLista()}
+function editarTarea(id){abrirModal(id)}
+function renderCalendario(){const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];const m=mesCalendario.getMonth(),y=mesCalendario.getFullYear();document.getElementById('mes-titulo').textContent=meses[m]+' '+y;const primerDia=new Date(y,m,1);const inicioGrid=new Date(primerDia);inicioGrid.setDate(1-((primerDia.getDay()+6)%7));const dias=['Lu','Ma','Mi','Ju','Vi','Sá','Do'];let html=dias.map(d=>'<div style="font-size:10px;font-weight:600;text-transform:uppercase;color:var(--texto-suave);padding:4px 0 8px;letter-spacing:.5px">'+d+'</div>').join('');for(let i=0;i<42;i++){const d=new Date(inicioGrid);d.setDate(inicioGrid.getDate()+i);const str=diaStr(d);const esHoy=str===hoyStr();const esSel=str===diaStr(diaSeleccionado);const otroMes=d.getMonth()!==m;const tiene=tareas.some(t=>t.fecha===str);html+='<div onclick="seleccionarDiaCal(\''+str+'\')" style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;position:relative;background:'+(esHoy?'var(--verde)':esSel?'var(--acento)':'transparent')+';color:'+(esHoy?'white':esSel?'var(--verde)':otroMes?'#ccc':'var(--texto)')+'">'+d.getDate()+(tiene?'<div style="position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:'+(esHoy||esSel?'white':'var(--acento)')+'"></div>':'')+'</div>'}document.getElementById('cal-grid').innerHTML=html}
+function seleccionarDiaCal(s){diaSeleccionado=new Date(s+'T12:00:00');renderCalendario();renderListaCal()}
+function renderListaCal(){const str=diaStr(diaSeleccionado);let lista=tareas.filter(t=>{if(filtroActivo!=='todos'&&t.tipo!==filtroActivo)return false;return t.fecha===str});document.getElementById('titulo-cal').textContent='Tareas del '+formatFecha(str);document.getElementById('count-cal').textContent=lista.length;document.getElementById('lista-cal').innerHTML=lista.length?lista.map(t=>renderTareaCard(t)).join(''):'<div class="vacio"><div class="vacio-icono">📭</div><h3>Sin tareas</h3><p>No hay tareas para este día</p></div>'}
+function cambiarMes(d){mesCalendario.setMonth(mesCalendario.getMonth()+d);renderCalendario()}
+function cambiarVista(nombre,tab){document.querySelectorAll('.vista').forEach(v=>v.classList.remove('activa'));document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));document.getElementById('vista-'+nombre).classList.add('activa');tab.classList.add('active');if(nombre==='calendario'){mesCalendario=new Date();renderCalendario();renderListaCal()}}
+async function limpiarTodo(){for(const t of tareas)await sbDelete(t.id);tareas=[];renderStats();renderSemana();renderLista()}
+async function iniciar(){try{const data=await sbGet('tareas?order=fecha.asc');tareas=Array.isArray(data)?data:[];renderStats();renderSemana();renderLista()}catch(e){console.error(e);document.getElementById('lista-tareas').innerHTML='<div class="vacio"><div class="vacio-icono">⚠️</div><h3>Error al cargar</h3><p>Verificá tu conexión</p></div>'}}
+iniciar();
+</script>
+</body>
+</html>
