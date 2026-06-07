@@ -248,7 +248,8 @@ async function verificarRecordatorios() {
   if (!CHAT_ID) return;
   console.log('Verificando recordatorios...');
   const tareas = await cargarTareas('completada=eq.false');
-  const hoy = new Date();
+  const hoy = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+
 
   for (const t of tareas) {
     if (!t.fecha) continue;
