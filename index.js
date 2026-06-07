@@ -274,5 +274,17 @@ async function verificarRecordatorios() {
   }
 }
 
-setInterval(verificarRecordatorios, 60 * 60 * 1000);
-setTimeout(verificarRecordatorios, 5000);
+function programarRecordatorio() {
+  const ahora = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+  const objetivo = new Date(ahora);
+  objetivo.setHours(19, 0, 0, 0);
+  if (ahora >= objetivo) objetivo.setDate(objetivo.getDate() + 1);
+  const msHasta = objetivo - ahora;
+  console.log('Próximo recordatorio en ' + Math.round(msHasta/60000) + ' minutos');
+  setTimeout(() => {
+    verificarRecordatorios();
+    setInterval(verificarRecordatorios, 24 * 60 * 60 * 1000);
+  }, msHasta);
+}
+programarRecordatorio();
+
